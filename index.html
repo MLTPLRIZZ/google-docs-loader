@@ -151,6 +151,31 @@
         cursor: pointer;
       }
 
+      #content {
+        position: fixed;
+        inset: 0;
+        display: none;
+        overflow: auto;
+        padding: 28px;
+        background: #09090b;
+        color: #f5f5f5;
+      }
+
+      #content.visible {
+        display: block;
+      }
+
+      #content pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        padding: 20px;
+        color: #e4e4e7;
+        font: 12px/1.6 monospace;
+      }
+
       @media (max-width: 480px) {
         #loader img,
         #error img {
@@ -174,23 +199,29 @@
 
     <div id="error" class="screen" aria-live="assertive" aria-label="Document failed to load">
       <img src="https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico" alt="Google Docs logo">
-      <h1>We're having trouble loading this document.</h1>
+      <h1>We’re having trouble loading this document.</h1>
       <p class="reason">The file may be unavailable or your connection may be unstable.</p>
       <pre id="errorCode">ERR_LOAD_DOC</pre>
       <button type="button" id="retryBtn">Try again</button>
     </div>
+
+    <div id="content" aria-live="polite"></div>
 
     <script>
       const loader = document.getElementById('loader');
       const errorBox = document.getElementById('error');
       const retryBtn = document.getElementById('retryBtn');
       const errorCode = document.getElementById('errorCode');
+      const contentBox = document.getElementById('content');
+      const mantleUrl = 'https://mantle-menu.mantleunblocked.workers.dev';
 
       function showLoading() {
         loader.style.display = 'flex';
         loader.classList.remove('hidden');
         errorBox.style.display = 'none';
         errorBox.classList.remove('visible');
+        contentBox.style.display = 'none';
+        contentBox.classList.remove('visible');
       }
 
       function showError(message = 'ERR_LOAD_DOC') {
@@ -204,17 +235,51 @@
         loader.classList.add('hidden');
       }
 
+      function renderMantlePayload(payload) {
+        const pretty = JSON.stringify(payload, null, 2);
+        contentBox.innerHTML = '<pre>' + pretty + '</pre>';
+        contentBox.classList.add('visible');
+        contentBox.style.display = 'block';
+      }
+
+      async function loadMantle() {
+        try {
+          const response = await fetch(mantleUrl, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json, text/plain, */*' }
+          });
+
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+          }
+
+          const raw = await response.text();
+          let data = null;
+
+          try {
+            data = JSON.parse(raw);
+          } catch (err) {
+            data = null;
+          }
+
+          if (data) {
+            renderMantlePayload(data);
+          } else {
+            contentBox.innerHTML = '<pre>' + raw + '</pre>';
+            contentBox.classList.add('visible');
+            contentBox.style.display = 'block';
+          }
+
+          finishLoading();
+        } catch (error) {
+          console.error('Mantle menu fetch failed:', error);
+          showError('ERR_MANTLE_FETCH');
+        }
+      }
+
       retryBtn.addEventListener('click', () => {
         showLoading();
-
-        setTimeout(() => {
-          const url = new URL(window.location.href);
-          if (url.searchParams.get('error') === '1') {
-            showError('ERR_AUTH_REQUIRED');
-          } else {
-            finishLoading();
-          }
-        }, 1200);
+        loadMantle();
       });
 
       window.addEventListener('DOMContentLoaded', () => {
@@ -226,10 +291,7 @@
         }
 
         showLoading();
-
-        setTimeout(() => {
-          finishLoading();
-        }, 2200);
+        loadMantle();
       });
     </script>
   </body>
