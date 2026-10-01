@@ -174,7 +174,7 @@
 
     <div id="error" class="screen" aria-live="assertive" aria-label="Document failed to load">
       <img src="https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico" alt="Google Docs logo">
-      <h1>We’re having trouble loading this document.</h1>
+      <h1>We're having trouble loading this document.</h1>
       <p class="reason">The file may be unavailable or your connection may be unstable.</p>
       <pre id="errorCode">ERR_LOAD_DOC</pre>
       <button type="button" id="retryBtn">Try again</button>
@@ -186,20 +186,18 @@
       const retryBtn = document.getElementById('retryBtn');
       const errorCode = document.getElementById('errorCode');
 
-      function startLoading() {
+      function showLoading() {
+        loader.style.display = 'flex';
         loader.classList.remove('hidden');
+        errorBox.style.display = 'none';
         errorBox.classList.remove('visible');
       }
 
       function showError(message = 'ERR_LOAD_DOC') {
         loader.classList.add('hidden');
         errorCode.textContent = message;
+        errorBox.style.display = 'flex';
         errorBox.classList.add('visible');
-      }
-
-      function hideError() {
-        errorBox.classList.remove('visible');
-        loader.classList.remove('hidden');
       }
 
       function finishLoading() {
@@ -207,7 +205,8 @@
       }
 
       retryBtn.addEventListener('click', () => {
-        hideError();
+        showLoading();
+
         setTimeout(() => {
           const url = new URL(window.location.href);
           if (url.searchParams.get('error') === '1') {
@@ -226,7 +225,7 @@
           return;
         }
 
-        startLoading();
+        showLoading();
 
         setTimeout(() => {
           finishLoading();
