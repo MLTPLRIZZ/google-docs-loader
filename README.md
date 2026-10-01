@@ -1,33 +1,41 @@
-# google-docs-loader
+# Mantle Loader
 
-Google Docs loading page UI - HTML/CSS loader with error handling
+A deployable Mantle menu loader for Vercel, Cloudflare Workers, Railway, and Replit.
 
-All credits to Mantle for this project so that you can deploy on Vercel.
+## Deploy now
 
-## Deploy to Vercel
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMLTPLRIZZ%2Fmantle-loader&project-name=mantle-loader&repo-name=mantle-loader)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMLTPLRIZZ%2Fgoogle-docs-loader&project-name=google-docs-loader&repository-name=google-docs-loader)
+[![Deploy to Railway](https://railway.app/button.svg)](https://railway.app/new/github?repo=MLTPLRIZZ/mantle-loader)
 
-## Project type
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://dash.cloudflare.com/)
 
-This is a static HTML/CSS/JavaScript project.
+[![Deploy to Replit](https://raw.githubusercontent.com/replit/replit/master/public/images/deploy-button.svg)](https://replit.com/github/MLTPLRIZZ/mantle-loader)
 
-- No backend required
-- No Python required
-- No Node.js required
-- Works directly on Vercel as a static site
+## What it does
 
-## Files
+This project loads a Mantle menu by trying several fallback URLs and rendering the response in the page.
 
-- `index.html` - The main loading page
-- `vercel.json` - Vercel static routing config
+The frontend uses a loading spinner, then attempts to fetch from:
 
-## Local preview
+- `https://api.allorigins.win/raw?url=https://mantle-menu.mantleunblocked.workers.dev`
+- `https://mantle-menu.mantleunblocked.workers.dev`
+- `https://mantle-menu.mantleunblocked.workers.dev/`
 
-Open `index.html` directly in a browser.
+If all fail, it shows an error state instead of hanging forever.
 
-Or run a local static server:
+## Project structure
+
+- `public/index.html` — main HTML page
+- `server.js` — Express server for Railway/Vercel
+- `worker.js` — Cloudflare Worker
+- `vercel.json` — Vercel config
+- `wrangler.toml` — Cloudflare config
+- `Procfile` — Railway config
+- `deploy.html` — deployment landing page
+
+## Local development
 
 ```bash
-python -m http.server 8000
-```
+npm install
+npm start
