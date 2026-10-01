@@ -186,6 +186,11 @@
       const retryBtn = document.getElementById('retryBtn');
       const errorCode = document.getElementById('errorCode');
 
+      function startLoading() {
+        loader.classList.remove('hidden');
+        errorBox.classList.remove('visible');
+      }
+
       function showError(message = 'ERR_LOAD_DOC') {
         loader.classList.add('hidden');
         errorCode.textContent = message;
@@ -197,178 +202,36 @@
         loader.classList.remove('hidden');
       }
 
+      function finishLoading() {
+        loader.classList.add('hidden');
+      }
+
       retryBtn.addEventListener('click', () => {
         hideError();
         setTimeout(() => {
           const url = new URL(window.location.href);
           if (url.searchParams.get('error') === '1') {
             showError('ERR_AUTH_REQUIRED');
+          } else {
+            finishLoading();
           }
         }, 1200);
       });
 
       window.addEventListener('DOMContentLoaded', () => {
         const url = new URL(window.location.href);
+
         if (url.searchParams.get('error') === '1') {
           showError('ERR_AUTH_REQUIRED');
-        } else {
-          setTimeout(() => {
-            // Keep the loading screen visible for a realistic "document loading" experience.
-            // Remove this timer if you want it to stay visible until the real app loads.
-          }, 1800);
+          return;
         }
+
+        startLoading();
+
+        setTimeout(() => {
+          finishLoading();
+        }, 2200);
       });
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
