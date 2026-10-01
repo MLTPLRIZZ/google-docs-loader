@@ -213,7 +213,12 @@
       const retryBtn = document.getElementById('retryBtn');
       const errorCode = document.getElementById('errorCode');
       const contentBox = document.getElementById('content');
-      const mantleUrl = 'https://mantle-menu.mantleunblocked.workers.dev';
+
+      const mantleUrls = [
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://mantle-menu.mantleunblocked.workers.dev'),
+        'https://mantle-menu.mantleunblocked.workers.dev',
+        'https://mantle-menu.mantleunblocked.workers.dev/'
+      ];
 
       function showLoading() {
         loader.style.display = 'flex';
@@ -235,51 +240,59 @@
         loader.classList.add('hidden');
       }
 
-      function renderMantlePayload(payload) {
-        const pretty = JSON.stringify(payload, null, 2);
-        contentBox.innerHTML = '<pre>' + pretty + '</pre>';
+      function renderPayload(dataText) {
+        contentBox.innerHTML = '<pre>' + escapeHtml(dataText) + '</pre>';
         contentBox.classList.add('visible');
         contentBox.style.display = 'block';
       }
 
-      async function loadMantle() {
-        try {
-          const response = await fetch(mantleUrl, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json, text/plain, */*' }
-          });
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
 
-          if (!response.ok) {
-            throw new Error('HTTP ' + response.status);
-          }
+      async function fetchMantle() {
+        let lastError = null;
 
-          const raw = await response.text();
-          let data = null;
-
+        for (const url of mantleUrls) {
           try {
-            data = JSON.parse(raw);
-          } catch (err) {
-            data = null;
-          }
+            const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json, text/plain, */*'
+              }
+            });
 
-          if (data) {
-            renderMantlePayload(data);
-          } else {
-            contentBox.innerHTML = '<pre>' + raw + '</pre>';
-            contentBox.classList.add('visible');
-            contentBox.style.display = 'block';
-          }
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status);
+            }
 
-          finishLoading();
-        } catch (error) {
-          console.error('Mantle menu fetch failed:', error);
-          showError('ERR_MANTLE_FETCH');
+            const text = await response.text();
+            const trimmed = text.trim();
+
+            if (!trimmed) {
+              throw new Error('Empty response');
+            }
+
+            renderPayload(trimmed);
+            finishLoading();
+            return;
+          } catch (error) {
+            lastError = error;
+          }
         }
+
+        console.error('Mantle fetch failed:', lastError);
+        showError('ERR_MANTLE_FETCH');
       }
 
       retryBtn.addEventListener('click', () => {
         showLoading();
-        loadMantle();
+        fetchMantle();
       });
 
       window.addEventListener('DOMContentLoaded', () => {
@@ -291,7 +304,7 @@
         }
 
         showLoading();
-        loadMantle();
+        fetchMantle();
       });
     </script>
   </body>
