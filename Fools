@@ -1,0 +1,7 @@
+const config = {
+  mantleFallbacks: [
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://mantle-menu.mantleunblocked.workers.dev'),
+    'https://mantle-menu.mantleunblocked.workers.dev',
+    'https://mantle-menu.mantleunblocked.workers.dev/'
+  ]
+};
